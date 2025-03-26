@@ -20,10 +20,10 @@ interface ProjectCardProps {
     id: string
     title: string
     thumbnail: string
-    status: string
-    dueDate: string
-    client: string
-    type: string
+    status?: string
+    dueDate?: string
+    client?: string
+    type?: string
     videoUrl?: string | null
   },
   workspaceId: string
@@ -93,7 +93,7 @@ export default function ProjectCard({ project, workspaceId }: ProjectCardProps) 
 
         <div className="mt-3">
           <Select value={status} onValueChange={setStatus}>
-            <SelectTrigger className={`h-7 text-xs font-medium ${getStatusColor(status)}`}>
+            <SelectTrigger className={`h-7 text-xs font-medium ${getStatusColor(status || "in progress")}`}>
               <SelectValue placeholder="Status" />
             </SelectTrigger>
             <SelectContent>
