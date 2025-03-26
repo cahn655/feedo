@@ -13,6 +13,7 @@ export interface Project {
   status?: string
   comments: Comment[]
   annotations: Annotation[]
+  clientAccess?: boolean
 }
 
 export interface Comment {
