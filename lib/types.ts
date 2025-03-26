@@ -6,7 +6,8 @@ export interface Project {
   title: string
   releaseDate: string
   isFinalEdit: boolean
-  clients: string[]
+  clients?: string[]
+  client?: string
   createdAt: string
   thumbnailUrl: string
   videoUrl?: string
