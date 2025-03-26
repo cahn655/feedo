@@ -42,6 +42,9 @@ export default function UploadVideoDialog({ isOpen, onClose, onUpload }: UploadV
         thumbnailUrl: "/placeholder.svg?height=200&width=300",
         comments: [],
         annotations: [],
+        type: "video",
+        createdAt: new Date().toISOString(),
+        isFinalEdit: false,
       }
 
       onUpload(newProject)
