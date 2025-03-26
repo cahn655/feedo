@@ -48,7 +48,12 @@ export default function ProjectGallery({ projects }: ProjectGalleryProps) {
               <Calendar className="h-4 w-4" />
               {project.releaseDate}
             </div>
-            <div>{project.clients.length > 0 ? `Clients: ${project.clients.join(", ")}` : "No clients"}</div>
+            {/* <div>{project.client.length > 0 ? `Clients: ${project.clients.join(", ")}` : "No clients"}</div> */}
+            {project.clients && (
+              <div>
+                {project.clients.length > 0 ? `Clients: ${project.clients.join(", ")}` : "No clients"}
+              </div>
+            )}
           </CardFooter>
         </Card>
       ))}
