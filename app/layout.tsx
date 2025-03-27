@@ -10,6 +10,8 @@ import {
   SignedOut,
   UserButton,
 } from '@clerk/nextjs'
+import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server'
+
 
 const inter = Inter({ subsets: ["latin"] })
 
