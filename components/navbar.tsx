@@ -1,5 +1,13 @@
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
+import {
+  ClerkProvider,
+  SignInButton,
+  SignUpButton,
+  SignedIn,
+  SignedOut,
+  UserButton,
+} from '@clerk/nextjs'
 
 export default function Navbar() {
   return (
@@ -38,9 +46,15 @@ export default function Navbar() {
         </nav>
 
         <div className="flex items-center gap-4">
-          <Link href="/signin" className="hidden text-gray-700 hover:text-sky-600 md:block">
+          {/* <Link href="/signin" className="hidden text-gray-700 hover:text-sky-600 md:block">
             Sign In
-          </Link>
+          </Link> */}
+          <SignedOut>
+              <SignInButton />
+          </SignedOut>
+          <SignedIn>
+              <UserButton />
+          </SignedIn>
           <Button className="rounded-full bg-sky-500 hover:bg-sky-600">
             Get Started
             <svg
