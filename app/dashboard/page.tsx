@@ -16,7 +16,7 @@ import {
   DialogTrigger,
   DialogClose,
 } from "@/components/ui/dialog"
-import Navbar from "@/components/navbar"
+import DashboardNavbar from "@/components/dashboard-navbar"
 import WorkspaceItem from "@/components/workspace-item"
 import { Progress } from "@/components/ui/progress"
 
@@ -104,7 +104,7 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navbar />
+      <DashboardNavbar />
 
       <main className="container mx-auto px-4 py-8">
         <div className="flex items-center justify-between mb-6">
