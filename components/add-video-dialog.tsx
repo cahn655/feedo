@@ -190,7 +190,14 @@ export default function AddVideoDialog({ workspaceName, buttonText = "Add Video"
                 onChange={handleFileChange}
               />
               <label htmlFor="video-upload">
-                <Button variant="outline" className="mt-4" onClick={(e) => e.stopPropagation()}>
+                <Button
+                  variant="outline"
+                  className="mt-4"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    fileInputRef.current?.click() // Trigger file input click
+                  }}
+                >
                   Browse Files
                 </Button>
               </label>

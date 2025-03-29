@@ -49,30 +49,31 @@ export default function Navbar() {
           {/* <Link href="/signin" className="hidden text-gray-700 hover:text-sky-600 md:block">
             Sign In
           </Link> */}
-          <SignedOut>
-              <SignInButton />
-          </SignedOut>
           <SignedIn>
               <UserButton />
           </SignedIn>
-          <Button className="rounded-full bg-sky-500 hover:bg-sky-600">
-            Get Started
-            <svg
-              className="ml-2 h-4 w-4"
-              fill="none"
-              height="24"
-              stroke="currentColor"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-              viewBox="0 0 24 24"
-              width="24"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path d="M5 12h14" />
-              <path d="m12 5 7 7-7 7" />
-            </svg>
-          </Button>
+          <SignedOut>
+            <Link href="/dashboard">
+              <Button className="rounded-full bg-sky-500 hover:bg-sky-600">
+                Get Started
+                <svg
+                className="ml-2 h-4 w-4"
+                fill="none"
+                height="24"
+                stroke="currentColor"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                viewBox="0 0 24 24"
+                width="24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                  <path d="M5 12h14" />
+                  <path d="m12 5 7 7-7 7" />
+                </svg>
+              </Button>
+            </Link>
+          </SignedOut>
         </div>
       </div>
     </header>

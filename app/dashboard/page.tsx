@@ -25,7 +25,8 @@ export default function DashboardPage() {
   const [newWorkspaceName, setNewWorkspaceName] = useState("")
   const [newWorkspaceDescription, setNewWorkspaceDescription] = useState("")
   const [newTeamMember, setNewTeamMember] = useState("")
-  const [teamMembers, setTeamMembers] = useState<string[]>([])
+  const [newTeamMemberPermission, setNewTeamMemberPermission] = useState("viewer"); // Default permission
+  const [teamMembers, setTeamMembers] = useState<{ email: string; permission: string }[]>([])
   const [expandedWorkspace, setExpandedWorkspace] = useState<string | null>(null)
   const [workspaces, setWorkspaces] = useState<any[]>([])
 
@@ -38,14 +39,15 @@ export default function DashboardPage() {
   const activeProjects = 24
 
   const handleAddTeamMember = () => {
-    if (newTeamMember && !teamMembers.includes(newTeamMember)) {
-      setTeamMembers([...teamMembers, newTeamMember])
+    if (newTeamMember && !teamMembers.some((member) => member.email === newTeamMember)) {
+      setTeamMembers([...teamMembers, { email: newTeamMember, permission: newTeamMemberPermission }])
       setNewTeamMember("")
+      setNewTeamMemberPermission("viewer") // Reset to default
     }
   }
 
   const handleRemoveTeamMember = (email: string) => {
-    setTeamMembers(teamMembers.filter((member) => member !== email))
+    setTeamMembers(teamMembers.filter((member) => member.email !== email))
   }
 
   const toggleWorkspace = (id: string) => {
@@ -160,6 +162,15 @@ export default function DashboardPage() {
                       onChange={(e) => setNewTeamMember(e.target.value)}
                       className="flex-1"
                     />
+                    <select
+                      value={newTeamMemberPermission}
+                      onChange={(e) => setNewTeamMemberPermission(e.target.value)}
+                      className="border border-gray-300 rounded-md px-2 py-1 text-sm"
+                    >
+                      <option value="editor">Editor</option>
+                      <option value="client">Client</option>
+                      <option value="viewer">Viewer</option>
+                    </select>
                     <Button type="button" onClick={handleAddTeamMember} className="bg-sky-500 hover:bg-sky-600 px-3">
                       <Plus className="h-5 w-5" />
                     </Button>
@@ -169,13 +180,14 @@ export default function DashboardPage() {
                     <div className="mt-4">
                       <p className="text-sm text-gray-500 mb-2">Team members:</p>
                       <div className="space-y-2">
-                        {teamMembers.map((email) => (
+                        {teamMembers.map(({ email, permission }) => (
                           <div
                             key={email}
                             className="flex items-center justify-between bg-gray-100 rounded-md px-3 py-2"
                           >
-                            <div className="flex items-center">
+                            <div className="flex items-center gap-2">
                               <span className="text-gray-800">{email}</span>
+                              <span className="text-sm text-gray-500">({permission})</span>
                             </div>
                             <Button
                               variant="ghost"
