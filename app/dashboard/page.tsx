@@ -46,33 +46,45 @@ export default function WorkspacePage() {
   useEffect(() => {
     const fetchWorkspaces = async () => {
       if (!user) return;
-      console.log(`Fetching workspaces for user: ${user.id}`); // Debugging line to check user ID
       try {
-        // Fetch workspace IDs from the UID collection
         const userDocRef = doc(db, "UID", user.id);
         const userDoc = await getDoc(userDocRef);
-
+  
         if (userDoc.exists()) {
           const { workspaces: workspaceIds } = userDoc.data();
-
+  
           if (workspaceIds && workspaceIds.length > 0) {
-            // Fetch workspace details using the document IDs
+            // Fetch workspace details and filter out deleted workspaces
             const fetchedWorkspaces = await Promise.all(
               workspaceIds.map(async (workspaceId: string) => {
                 const workspaceDocRef = doc(db, "workspaces", workspaceId);
                 const workspaceDoc = await getDoc(workspaceDocRef);
-                return { id: workspaceDoc.id, ...workspaceDoc.data() };
+                return workspaceDoc.exists() ? { id: workspaceDoc.id, ...workspaceDoc.data() } : null;
               })
             );
-
-            setWorkspaces(fetchedWorkspaces);
+  
+            // Filter out null values (deleted workspaces) and update user's workspace list
+            const validWorkspaces = fetchedWorkspaces.filter(Boolean);
+            
+            // Update the user's workspace list if there were deleted workspaces
+            if (validWorkspaces.length !== workspaceIds.length) {
+              await setDoc(
+                userDocRef,
+                { 
+                  workspaces: validWorkspaces.map(workspace => workspace.id)
+                },
+                { merge: true }
+              );
+            }
+  
+            setWorkspaces(validWorkspaces);
           }
         }
       } catch (error) {
         console.error("Error fetching workspaces:", error);
       }
     };
-
+  
     fetchWorkspaces();
   }, [user]);
 
@@ -124,12 +136,12 @@ export default function WorkspacePage() {
       );
 
       // Update local state
-      setWorkspaces([...workspaces, { 
+      setWorkspaces([{ 
         ...newWorkspace, 
         id: docRef.id,
         members: teamMembers.length, 
         videos: 0 
-      }]);
+      }, ...workspaces]);
 
       // Reset form
       setNewWorkspaceName("");
