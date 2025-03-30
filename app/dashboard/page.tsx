@@ -44,49 +44,49 @@ export default function WorkspacePage() {
   const { user } = useUser()
 
   useEffect(() => {
-    const fetchWorkspaces = async () => {
-      if (!user) return;
-      try {
-        const userDocRef = doc(db, "UID", user.id);
-        const userDoc = await getDoc(userDocRef);
-  
-        if (userDoc.exists()) {
-          const { workspaces: workspaceIds } = userDoc.data();
-  
-          if (workspaceIds && workspaceIds.length > 0) {
-            // Fetch workspace details and filter out deleted workspaces
-            const fetchedWorkspaces = await Promise.all(
-              workspaceIds.map(async (workspaceId: string) => {
-                const workspaceDocRef = doc(db, "workspaces", workspaceId);
-                const workspaceDoc = await getDoc(workspaceDocRef);
-                return workspaceDoc.exists() ? { id: workspaceDoc.id, ...workspaceDoc.data() } : null;
-              })
+  const fetchWorkspaces = async () => {
+    if (!user) return;
+    try {
+      const userDocRef = doc(db, "UID", user.primaryEmailAddress?.emailAddress || "");
+      const userDoc = await getDoc(userDocRef);
+
+      if (userDoc.exists()) {
+        const { workspaces: workspaceIds } = userDoc.data();
+
+        if (workspaceIds && workspaceIds.length > 0) {
+          // Fetch workspace details and filter out deleted workspaces
+          const fetchedWorkspaces = await Promise.all(
+            workspaceIds.map(async (workspaceId: string) => {
+              const workspaceDocRef = doc(db, "workspaces", workspaceId);
+              const workspaceDoc = await getDoc(workspaceDocRef);
+              return workspaceDoc.exists() ? { id: workspaceDoc.id, ...workspaceDoc.data() } : null;
+            })
+          );
+
+          // Filter out null values (deleted workspaces) and update user's workspace list
+          const validWorkspaces = fetchedWorkspaces.filter(Boolean);
+          
+          // Update the user's workspace list if there were deleted workspaces
+          if (validWorkspaces.length !== workspaceIds.length) {
+            await setDoc(
+              userDocRef,
+              { 
+                workspaces: validWorkspaces.map(workspace => workspace.id)
+              },
+              { merge: true }
             );
-  
-            // Filter out null values (deleted workspaces) and update user's workspace list
-            const validWorkspaces = fetchedWorkspaces.filter(Boolean);
-            
-            // Update the user's workspace list if there were deleted workspaces
-            if (validWorkspaces.length !== workspaceIds.length) {
-              await setDoc(
-                userDocRef,
-                { 
-                  workspaces: validWorkspaces.map(workspace => workspace.id)
-                },
-                { merge: true }
-              );
-            }
-  
-            setWorkspaces(validWorkspaces);
           }
+
+          setWorkspaces(validWorkspaces);
         }
-      } catch (error) {
-        console.error("Error fetching workspaces:", error);
       }
-    };
-  
-    fetchWorkspaces();
-  }, [user]);
+    } catch (error) {
+      console.error("Error fetching workspaces:", error);
+    }
+  };
+
+  fetchWorkspaces();
+}, [user]);
 
   const handleAddTeamMember = () => {
     if (newTeamMember && !teamMembers.some((member) => member.email === newTeamMember)) {
@@ -106,35 +106,48 @@ export default function WorkspacePage() {
 
   const handleCreateWorkspace = async () => {
     if (!newWorkspaceName.trim() || !user) return;
-
+    teamMembers.push({ email: user.primaryEmailAddress?.emailAddress || user.id, permission: "owner" });
     try {
       const newWorkspace = {
         createdAt: new Date().toISOString(),
-        ownerId: user.id, // Use Clerk user ID
         name: newWorkspaceName,
         description: newWorkspaceDescription,
         collaborators: teamMembers,
         projects: [],
       }
-
+  
       // Add workspace to Firestore
       const docRef = await addDoc(collection(db, "workspaces"), newWorkspace);
-
-      // Add workspace reference to user's workspaces
-      const userDocRef = doc(db, "UID", user.id);
-      const userDoc = await getDoc(userDocRef);
-      const existingWorkspaces = userDoc.exists() ? userDoc.data()?.workspaces || [] : [];
-
-      // Add the new workspace ID to the beginning of the array
-      await setDoc(
-        userDocRef,
-        { 
-          workspaces: [docRef.id, ...existingWorkspaces],
-          email: user.emailAddresses[0].emailAddress
-        },
-        { merge: true }
-      );
-
+  
+      for (const collaborator of teamMembers) {
+        // Get user's email
+        console.log(collaborator);
+        const userEmail = collaborator["email"];
+        console.log(userEmail);
+    
+        // Try to get existing user document
+        const userDocRef = doc(db, "UID", userEmail);
+        const userDoc = await getDoc(userDocRef);
+    
+        if (userDoc.exists()) {
+          // User exists, update their workspaces array
+          const existingWorkspaces = userDoc.data()?.workspaces || [];
+          await setDoc(
+            userDocRef,
+            { 
+              workspaces: [docRef.id, ...existingWorkspaces],
+              email: userEmail
+            }
+          );
+        } else {
+          // User doesn't exist, create new document
+          await setDoc(userDocRef, {
+            email: userEmail,
+            workspaces: [docRef.id]
+          });
+        }
+      }
+  
       // Update local state
       setWorkspaces([{ 
         ...newWorkspace, 
@@ -142,13 +155,13 @@ export default function WorkspacePage() {
         members: teamMembers.length, 
         videos: 0 
       }, ...workspaces]);
-
+  
       // Reset form
       setNewWorkspaceName("");
       setNewWorkspaceDescription("");
       setTeamMembers([]);
       setIsCreateWorkspaceOpen(false);
-
+  
     } catch (error) {
       console.error("Error creating workspace:", error);
     }
