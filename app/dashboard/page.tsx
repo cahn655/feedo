@@ -1,8 +1,11 @@
 "use client"
 
 import { useState } from "react"
-import { Building, Filter, Plus, Search, X, HardDrive, ClockIcon, CheckCircle, PlayCircle } from "lucide-react"
-
+import { Building, Filter, Plus, Search, X, HardDrive, ClockIcon, CheckCircle, PlayCircle, DoorClosed } from "lucide-react"
+import { db } from "@/lib/firebase" // Import Firestore instance
+import { collection, addDoc, setDoc, doc } from "firebase/firestore" // Import Firestore methods
+import { getAuth } from "firebase/auth" // Import Firebase Auth
+import { useUser } from "@clerk/nextjs"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
@@ -38,6 +41,8 @@ export default function WorkspacePage() {
   const completedProjects = 18
   const activeProjects = 24
 
+  const { user } = useUser()
+
   const handleAddTeamMember = () => {
     if (newTeamMember && !teamMembers.some((member) => member.email === newTeamMember)) {
       setTeamMembers([...teamMembers, { email: newTeamMember, permission: newTeamMemberPermission }])
@@ -54,25 +59,49 @@ export default function WorkspacePage() {
     setExpandedWorkspace(expandedWorkspace === id ? null : id)
   }
 
-  const handleCreateWorkspace = () => {
-    if (newWorkspaceName.trim()) {
+  const handleCreateWorkspace = async () => {
+    if (!newWorkspaceName.trim() || !user) return;
+
+    try {
       const newWorkspace = {
-        id: `workspace-${Date.now()}`,
+        createdAt: new Date().toISOString(),
+        ownerId: user.id, // Use Clerk user ID
         name: newWorkspaceName,
         description: newWorkspaceDescription,
-        members: teamMembers.length,
-        teamMembers: teamMembers,
-        videos: 0,
+        collaborators: teamMembers,
         projects: [],
       }
 
-      setWorkspaces([...workspaces, newWorkspace])
+      // Add workspace to Firestore
+      const docRef = await addDoc(collection(db, "workspaces"), newWorkspace);
+
+      // Add workspace reference to user's workspaces
+      const userDocRef = doc(db, "UID", user.id);
+      await setDoc(
+        userDocRef,
+        { 
+          workspaces: [docRef.id],
+          email: user.emailAddresses[0].emailAddress
+        },
+        { merge: true }
+      );
+
+      // Update local state
+      setWorkspaces([...workspaces, { 
+        ...newWorkspace, 
+        id: docRef.id,
+        members: teamMembers.length, 
+        videos: 0 
+      }]);
 
       // Reset form
-      setNewWorkspaceName("")
-      setNewWorkspaceDescription("")
-      setTeamMembers([])
-      setIsCreateWorkspaceOpen(false)
+      setNewWorkspaceName("");
+      setNewWorkspaceDescription("");
+      setTeamMembers([]);
+      setIsCreateWorkspaceOpen(false);
+
+    } catch (error) {
+      console.error("Error creating workspace:", error);
     }
   }
 

@@ -25,10 +25,11 @@ interface ProjectCardProps {
     client?: string
     type?: string
     videoUrl?: string | null
-  }
+  },
+  workspaceId: string
 }
 
-export default function ProjectCard({ project }: ProjectCardProps) {
+export default function ProjectCard({ project, workspaceId }: ProjectCardProps) {
   const [status, setStatus] = useState(project.status)
 
   const getStatusColor = (status: string) => {
