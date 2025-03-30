@@ -1,9 +1,9 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Building, Filter, Plus, Search, X, HardDrive, ClockIcon, CheckCircle, PlayCircle, DoorClosed } from "lucide-react"
 import { db } from "@/lib/firebase" // Import Firestore instance
-import { collection, addDoc, setDoc, doc } from "firebase/firestore" // Import Firestore methods
+import { collection, addDoc, setDoc, doc, getDocs, query, where, getDoc } from "firebase/firestore" // Import Firestore methods
 import { getAuth } from "firebase/auth" // Import Firebase Auth
 import { useUser } from "@clerk/nextjs"
 import { Button } from "@/components/ui/button"
@@ -43,6 +43,39 @@ export default function WorkspacePage() {
 
   const { user } = useUser()
 
+  useEffect(() => {
+    const fetchWorkspaces = async () => {
+      if (!user) return;
+      console.log(`Fetching workspaces for user: ${user.id}`); // Debugging line to check user ID
+      try {
+        // Fetch workspace IDs from the UID collection
+        const userDocRef = doc(db, "UID", user.id);
+        const userDoc = await getDoc(userDocRef);
+
+        if (userDoc.exists()) {
+          const { workspaces: workspaceIds } = userDoc.data();
+
+          if (workspaceIds && workspaceIds.length > 0) {
+            // Fetch workspace details using the document IDs
+            const fetchedWorkspaces = await Promise.all(
+              workspaceIds.map(async (workspaceId: string) => {
+                const workspaceDocRef = doc(db, "workspaces", workspaceId);
+                const workspaceDoc = await getDoc(workspaceDocRef);
+                return { id: workspaceDoc.id, ...workspaceDoc.data() };
+              })
+            );
+
+            setWorkspaces(fetchedWorkspaces);
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching workspaces:", error);
+      }
+    };
+
+    fetchWorkspaces();
+  }, [user]);
+
   const handleAddTeamMember = () => {
     if (newTeamMember && !teamMembers.some((member) => member.email === newTeamMember)) {
       setTeamMembers([...teamMembers, { email: newTeamMember, permission: newTeamMemberPermission }])
@@ -77,10 +110,14 @@ export default function WorkspacePage() {
 
       // Add workspace reference to user's workspaces
       const userDocRef = doc(db, "UID", user.id);
+      const userDoc = await getDoc(userDocRef);
+      const existingWorkspaces = userDoc.exists() ? userDoc.data()?.workspaces || [] : [];
+
+      // Add the new workspace ID to the beginning of the array
       await setDoc(
         userDocRef,
         { 
-          workspaces: [docRef.id],
+          workspaces: [docRef.id, ...existingWorkspaces],
           email: user.emailAddresses[0].emailAddress
         },
         { merge: true }
