@@ -20,7 +20,7 @@ import DashboardNavbar from "@/components/dashboard-navbar"
 import WorkspaceItem from "@/components/workspace-item"
 import { Progress } from "@/components/ui/progress"
 
-export default function DashboardPage() {
+export default function WorkspacePage() {
   const [isCreateWorkspaceOpen, setIsCreateWorkspaceOpen] = useState(false)
   const [newWorkspaceName, setNewWorkspaceName] = useState("")
   const [newWorkspaceDescription, setNewWorkspaceDescription] = useState("")

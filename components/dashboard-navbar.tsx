@@ -59,9 +59,9 @@ export default function DashboardNavbar() {
                 </div>
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => window.location.href = '/profile'}>Profile</DropdownMenuItem>
-              <DropdownMenuItem onClick={() => window.location.href = '/settings'}>Settings</DropdownMenuItem>
-              <DropdownMenuItem onClick={() => window.location.href = '/billing'}>Billing</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => window.location.href = '/dashboard/profile'}>Profile</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => window.location.href = '/dashboard/settings'}>Settings</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => window.location.href = '/dashboard/billing'}>Billing</DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem
                 className="text-red-600 focus:text-red-600" 

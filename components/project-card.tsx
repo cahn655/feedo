@@ -25,11 +25,10 @@ interface ProjectCardProps {
     client?: string
     type?: string
     videoUrl?: string | null
-  },
-  workspaceId: string
+  }
 }
 
-export default function ProjectCard({ project, workspaceId }: ProjectCardProps) {
+export default function ProjectCard({ project }: ProjectCardProps) {
   const [status, setStatus] = useState(project.status)
 
   const getStatusColor = (status: string) => {
@@ -52,7 +51,7 @@ export default function ProjectCard({ project, workspaceId }: ProjectCardProps) 
   return (
     <div className="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm transition-all hover:shadow-md">
       <div className="relative">
-        <Link href={`/workspace/${workspaceId}/video/${project.id}`}>
+        <Link href={`/dashboard/video/${project.id}`}>
           <Image
             src={project.thumbnail || "/placeholder.svg"}
             alt={project.title}
@@ -70,7 +69,7 @@ export default function ProjectCard({ project, workspaceId }: ProjectCardProps) 
 
       <div className="p-4">
         <div className="flex items-start justify-between">
-          <Link href={`/workspace/${workspaceId}/video/${project.id}`} className="hover:underline">
+          <Link href={`/dashboard/video/${project.id}`} className="hover:underline">
             <h3 className="font-medium text-gray-900">{project.title}</h3>
           </Link>
 
