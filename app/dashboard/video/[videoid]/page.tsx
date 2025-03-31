@@ -30,13 +30,19 @@ import DashboardNavbar from "@/components/dashboard-navbar"
 import VideoPlayer from "@/components/video-player"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
-export default function VideoPage({ params }: { params: { id: string } }) {
+interface PageProps {
+  params: {
+    videoid: string;
+  };
+}
+
+export default function VideoPage({ params }: PageProps) {
   const [status, setStatus] = useState("In Progress")
   const [activeTab, setActiveTab] = useState("comments")
 
   // Sample video data
   const video = {
-    id: params.id,
+    id: params.videoid,
     title: "Brand Video Redesign",
     client: "Acme Corporation",
     dueDate: "Oct 15, 2023",
