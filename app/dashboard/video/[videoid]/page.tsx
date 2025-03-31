@@ -2,18 +2,13 @@ import { auth } from "@clerk/nextjs/server"
 import { redirect } from "next/navigation"
 import VideoPageClient from "@/app/dashboard/video/[videoid]/video-page-client"
 
-type PageProps = {
-  params: {
-    videoid: string
-  }
-  searchParams: { [key: string]: string | string[] | undefined }
-}
 
-export default async function VideoPage({ params }: PageProps) {
-  const { userId } = await auth()
+export default async function VideoPage({ params }: { params: { videoid: string } }) {
+  const { userId } = await auth();
+  const { videoid } = await params;
 
   if (!userId) {
-    redirect("/signin")
+    redirect("/signin");
   }
 
   return <VideoPageClient videoId={params.videoid} />
